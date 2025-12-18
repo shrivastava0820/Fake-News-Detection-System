@@ -1,0 +1,60 @@
+KGAT_e83b2b9850075b8bace9d003cd033c37
+
+//Add in ReadME
+Decision locked (don’t revisit)
+
+Use only:
+
+text (optionally title + text later)
+
+Ignore completely:
+
+subject
+
+date
+
+You can mention this explicitly in README later — that’s a plus. 	
+
+When you multiply them TF x IDF, words that are 
+frequent in one document but rare in others get the highest scores.
+
+ere is why TF-IDF is the better partner for Logistic Regression:
+
+Noise Reduction: It automatically "mutes" stop words (like "a", "an", "the") without you having to manually delete them. This allows Logistic Regression to focus its weights on descriptive words like "excellent," "broken," or "fraud."
+
+
+Normalizes Length: If one document is 10 words long and another is 1,000, raw counts would make the longer document seem more "important." TF-IDF normalizes the scores so the length doesn't bias the model.
+
+Efficiency: Logistic Regression works exceptionally well with sparse matrices (matrices full of zeros), which is exactly what TF-IDF produces.
+
+Interpretability: After training, you can look at the Logistic Regression coefficients. Because of TF-IDF, the highest positive weights will correspond to the most "defining" words for that category (e.g., in sentiment analysis, the word "amazing" will have a high TF-IDF score and thus a high model weight).
+
+
+***tf-idf with lstm***
+
+We can’t use TF-IDF with an LSTM because TF-IDF produces a single, order-agnostic document vector, whereas an LSTM requires an ordered sequence of token representations to model temporal dependencies. TF-IDF removes the time dimension that LSTMs are designed to learn from.
+
+
+
+Embeddings : Embeddings turn words into vectors; LSTMs turn a sequence of word vectors into a context-aware representation.
+
+Last hidden state of LSTM is  :A single vector that summarizes the entire sequence, conditioned on word order and context.
+
+LSTM pipeline : 
+text
+ ↓
+token IDs (batch, seq_len)
+ ↓
+embeddings (batch, seq_len, embed_dim)
+ ↓
+LSTM
+ ↓
+last hidden state (batch, hidden_dim)
+ ↓
+linear layer
+ ↓
+prediction
+
+(v1,v2)->(v1,v2,v3)->(v1,v3)    v1 : batch size v2 : total number of words or iterations v3 : n_dimensions or features
+				v2 does not get vanished after LSTM, it get folded into a hidden state and hence, invisible. 
+				Its not discarded but summarized into the hidden state.
