@@ -37,6 +37,33 @@ We can’t use TF-IDF with an LSTM because TF-IDF produces a single, order-agnos
 
 
 Embeddings : Embeddings turn words into vectors; LSTMs turn a sequence of word vectors into a context-aware representation.
+	     Embeddings learn semantic relationships between words based on context, not explicit frequency counts.
+
+Output of embedding layer:
+Shape: (batch_size, seq_len, embed_dim)
+Example: (32, 300, 100)
+Dtype: float
+
+tokens
+ → embeddings
+ → LSTM
+ → linear layer
+ → prediction
+ → loss
+
+Backward pass:
+loss
+ ← linear layer weights
+ ← LSTM weights
+ ← embedding weight
+
+embeddings are one place where learning happens
+
+but not the only place
+
+Embeddings are just the first trainable layer.
+
+gradient descent flows through embeddings and gradients need continuous values so embeddings are float values.
 
 Last hidden state of LSTM is  :A single vector that summarizes the entire sequence, conditioned on word order and context.
 
@@ -58,3 +85,86 @@ prediction
 (v1,v2)->(v1,v2,v3)->(v1,v3)    v1 : batch size v2 : total number of words or iterations v3 : n_dimensions or features
 				v2 does not get vanished after LSTM, it get folded into a hidden state and hence, invisible. 
 				Its not discarded but summarized into the hidden state.
+
+
+
+LSTM
+
+takes a word vector (from embeddings)
+
+combines it with its previous internal state
+
+produces a new internal state
+
+
+The trainable parameters of the LSTM live inside the LSTM layer, and they are updated during backpropagation just like embedding weights.
+
+
+Important:
+
+the same LSTM parameters are reused at every time step
+
+gradients accumulate across all 300 steps
+
+parameters update once per batch
+
+
+Code pipeline :
+
+Dataset (1 sample)
+→ token_ids: (seq_len,)        ← 1D
+↓
+DataLoader (batching)
+→ batch_x: (batch_size, seq_len) ← 2D
+↓
+Embedding
+→ (batch_size, seq_len, embed_dim) ← 3D
+↓
+LSTM
+
+The Dataset takes raw text and labels and returns token IDs and labels as tensors.
+The DataLoader batches them.
+The Model takes token IDs, converts them to vectors using embeddings, processes them with LSTM, and outputs logits.
+
+
+
+Raw text + label
+   ↓
+Dataset
+   → tokenize text
+   → truncate / pad
+   → return (token_ids, label)
+   ↓
+DataLoader
+   → batch samples
+   → (batch_size, seq_len)
+   ↓
+Model
+   → Embedding (learnable)
+   → LSTM (learnable)
+   → Classifier
+
+
+forward pipeline
+
+batch_x (32, 300)           ← token IDs
+↓
+Embedding
+↓
+embedded_x (32, 300, 100)
+↓
+LSTM
+↓
+h_n[0] (32, 128)
+↓
+Linear
+↓
+logits (32, 1)
+
+
+
+
+
+
+
+
